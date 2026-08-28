@@ -25,6 +25,3 @@ Thumbs.db
 Desktop.ini
 $RECYCLE.BIN/
 .DS_Store
-
-## Configuracion local con valores reales
-appsettings.Development.json
