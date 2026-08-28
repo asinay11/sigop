@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches: [master, develop, 'feature/**']
+  pull_request:
+    branches: [master, develop]
+
+jobs:
+  backend:
+    name: Backend .NET
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restaurar
+        run: dotnet restore backend/Sigop.sln
+
+      - name: Compilar
+        run: dotnet build backend/Sigop.sln --no-restore --configuration Release
+
+      - name: Pruebas
+        run: dotnet test backend/Sigop.sln --no-build --configuration Release --verbosity normal
+
+      - name: Dependencias vulnerables
+        run: dotnet list backend/Sigop.sln package --vulnerable --include-transitive
+
+  frontend:
+    name: Portal Angular
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend/sigop-portal
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: frontend/sigop-portal/package-lock.json
+
+      - name: Instalar
+        run: npm ci
+
+      - name: Compilar
+        run: npm run build
+
+      - name: Dependencias vulnerables
+        run: npm audit --audit-level=high
+        continue-on-error: true
+
+  secretos:
+    name: Buscar secretos
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: La configuracion local no debe estar versionada
+        run: |
+          if git ls-files | grep -q 'appsettings\.Development\.json'; then
+            echo "::error::appsettings.Development.json esta versionado y contiene secretos reales."
+            exit 1
+          fi
+          echo "OK: ninguna configuracion local versionada."
+
+      - name: Las plantillas no deben tener valores reales
+        run: |
+          if git ls-files '*appsettings.json' | xargs grep -lE 'Password=[^_"]|"(Clave|ClaveFirma)": *"[^_]' 2>/dev/null; then
+            echo "::error::Una plantilla appsettings.json contiene un valor real en lugar de un marcador."
+            exit 1
+          fi
+          echo "OK: las plantillas solo contienen marcadores."
