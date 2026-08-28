@@ -1,0 +1,70 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+:root {
+  --fondo: #e9edf2;
+  --superficie: #ffffff;
+  --superficie-alt: #f4f6f9;
+  --superficie-tenue: #fafbfd;
+
+  --texto: #16202b;
+  --texto-suave: #5b6876;
+  --texto-tenue: #7c8794;
+  --texto-debil: #8c9aa8;
+
+  --primario: #1f4e79;
+  --primario-hover: #17395a;
+  --primario-fondo: #e8eff6;
+
+  --borde: #d6dde5;
+  --borde-suave: #e4e9ef;
+  --borde-fuerte: #c3ccd6;
+
+  --barra: #16202b;
+  --barra-texto: #c7d0da;
+  --barra-alt: #22303f;
+
+  --peligro: #8c1d18;
+  --peligro-fondo: #fbeae8;
+  --peligro-borde: #efc7c2;
+
+  --radio: 2px;
+  --radio-alt: 4px;
+
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--fondo);
+  color: var(--texto);
+  font-family: 'IBM Plex Sans', system-ui, sans-serif;
+  font-size: 13.5px;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--primario);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--primario-hover);
+  text-decoration: underline;
+}
+
+input,
+select,
+textarea,
+button {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--primario);
+  outline-offset: 1px;
+}
