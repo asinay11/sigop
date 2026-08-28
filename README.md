@@ -23,33 +23,16 @@ Los paquetes se restauran con `dotnet build` y `npm install`.
 
 ## Configuración
 
-Los `appsettings.json` del repositorio son plantillas con marcadores `__NOMBRE__`. No
-contienen credenciales.
+Hay que editar tres archivos y sustituir en ellos los marcadores `__NOMBRE__`:
 
-Cada instalación usa sus propias credenciales de PostgreSQL y RabbitMQ, y genera sus
-propias claves. Desde la raíz, en PowerShell, cambiar las dos primeras líneas y ejecutar:
-
-```powershell
-$usuarioBd = "postgres"; $passwordBd = "TU_CONTRASENA_POSTGRES"
-$usuarioMq = "guest";    $passwordMq = "guest"
-
-function NuevaClave { $b = New-Object byte[] 32; (New-Object Security.Cryptography.RNGCryptoServiceProvider).GetBytes($b); [Convert]::ToBase64String($b) }
-$sinBom = New-Object System.Text.UTF8Encoding $false
-$claveFirma = NuevaClave; $claveCifrado = NuevaClave
-
-"backend/Sigop.Api","backend/Sigop.Worker.Outbox","backend/Sigop.Worker.Consumidor" | ForEach-Object {
-  $texto = (Get-Content "$_/appsettings.json" -Raw).
-    Replace("__USUARIO_BD__",$usuarioBd).Replace("__CONTRASENA_BD__",$passwordBd).
-    Replace("__USUARIO_RABBIT__",$usuarioMq).Replace("__CONTRASENA_RABBIT__",$passwordMq).
-    Replace("__CLAVE_FIRMA_BASE64_32_BYTES__",$claveFirma).
-    Replace("__CLAVE_CIFRADO_BASE64_32_BYTES__",$claveCifrado)
-  [System.IO.File]::WriteAllText((Join-Path $PWD "$_/appsettings.Development.json"), $texto, $sinBom)
-}
+```
+backend/Sigop.Api/appsettings.json
+backend/Sigop.Worker.Outbox/appsettings.json
+backend/Sigop.Worker.Consumidor/appsettings.json
 ```
 
-Crea tres archivos `appsettings.Development.json`, uno por proyecto. Los tres proyectos
-arrancan en entorno `Development` y .NET los carga por encima de las plantillas. Están en
-`.gitignore`.
+Cada instalación usa sus propias credenciales de PostgreSQL y RabbitMQ, y sus propias
+claves. Ningún valor tiene que coincidir con el de otra instalación.
 
 Valores:
 
@@ -60,10 +43,19 @@ Valores:
 | `__CLAVE_FIRMA_BASE64_32_BYTES__` | firma del JWT, base64 de 32 bytes |
 | `__CLAVE_CIFRADO_BASE64_32_BYTES__` | AES-GCM, base64 de 16, 24 o 32 bytes |
 
-La clave de cifrado debe ser la misma en los tres archivos. El bloque de arriba ya lo hace.
+La clave de cifrado debe ser **la misma en los tres archivos**: la API cifra el NIT y la
+cuenta bancaria al guardar, y el consumidor los descifra para llamar al banco.
 
-Para escribir los archivos a mano, usar UTF-8 sin BOM. `Set-Content -Encoding utf8` en
-PowerShell 5.1 añade BOM e invalida el JSON.
+Para generar las dos claves, en PowerShell:
+
+```powershell
+$b = New-Object byte[] 32
+(New-Object Security.Cryptography.RNGCryptoServiceProvider).GetBytes($b)
+[Convert]::ToBase64String($b)
+```
+
+Los datos de prueba guardan el NIT y la cuenta en claro, así que una clave recién generada
+lee el juego de datos sin problema.
 
 ## Base de datos
 
