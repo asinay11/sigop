@@ -1,0 +1,27 @@
+## .NET
+[Bb]in/
+[Oo]bj/
+*.user
+*.suo
+.vs/
+TestResults/
+*.nupkg
+
+## Angular / Node
+node_modules/
+dist/
+.angular/
+npm-debug.log*
+*.tsbuildinfo
+
+## IDE
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+
+## Sistema operativo
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
